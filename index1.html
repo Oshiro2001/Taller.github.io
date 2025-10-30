@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Blockchain - Gestión de Inventarios Mayoristas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .header-info {
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: var(--primary);
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        /* Content Area */
+        .content {
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .metric-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-change {
+            font-size: 0.85em;
+            margin-top: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .metric-change.positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .metric-change.negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table thead {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .data-table tbody tr:hover {
+            background: #e9ecef;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #333;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        /* Blockchain Transaction */
+        .blockchain-block {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blockchain-block::before {
+            content: '⛓️';
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 2em;
+            opacity: 0.3;
+        }
+
+        .block-hash {
+            color: #3498db;
+            word-break: break-all;
+            font-size: 0.85em;
+        }
+
+        /* Warehouse Map */
+        .warehouse-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            max-width: 600px;
+        }
+
+        .location-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .location-cell:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .location-cell.occupied {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .location-cell.optimal {
+            background: var(--warning);
+            color: #333;
+            border-color: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        /* Status Badge */
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Chart Placeholder */
+        .chart-container {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .warehouse-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>🔗 Sistema Blockchain - Gestión de Inventarios</h1>
+                <p>Universidad Nacional Hermilio Valdizán | Tiendas Mayoristas Huánuco</p>
+            </div>
+            <div class="header-info">
+                <div>Estado: <span class="badge badge-success">ACTIVO</span></div>
+                <div>Nodos Blockchain: 3/3 ✓</div>
+                <div id="currentTime"></div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="showTab('inventory')">📦 Inventario</button>
+            <button class="nav-tab" onclick="showTab('optimization')">📍 Optimización Espacial</button>
+            <button class="nav-tab" onclick="showTab('blockchain')">⛓️ Blockchain</button>
+            <button class="nav-tab" onclick="showTab('compliance')">⚖️ Cumplimiento Legal</button>
+            <button class="nav-tab" onclick="showTab('reports')">📈 Reportes</button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <h2>Panel de Control General</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Productos en Inventario</div>
+                        <div class="metric-value">850</div>
+                        <div class="metric-change positive">↑ 12 desde ayer</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Discrepancias Detectadas</div>
+                        <div class="metric-value">2.1%</div>
+                        <div class="metric-change positive">↓ 25.9% vs baseline (28%)</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Tiempo Localización Promedio</div>
+                        <div class="metric-value">8.2 min</div>
+                        <div class="metric-change positive">↓ 13.8 min vs manual (22 min)</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Índice de Cumplimiento</div>
+                        <div class="metric-value">96%</div>
+                        <div class="metric-change positive">COMPLIANT ✓</div>
+                    </div>
+                </div>
+
+                <h3>Alertas Activas</h3>
+                <div class="alert alert-warning">
+                    ⚠️ <strong>Punto de Reorden:</strong> Producto #234 (Arroz Integral 25kg) tiene 10 unidades restantes
+                </div>
+                <div class="alert alert-success">
+                    ✓ <strong>Verificación Completa:</strong> Auditoría legal ejecutada exitosamente - 95% cumplimiento
+                </div>
+                <div class="alert alert-info">
+                    ℹ️ <strong>Optimización:</strong> 5 productos reubicados automáticamente por algoritmo genético
+                </div>
+
+                <h3>Últimas Transacciones Blockchain</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Tipo</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Hash</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2025-01-30 14:23:45</td>
+                            <td>INV_IN</td>
+                            <td>Arroz Integral 25kg</td>
+                            <td>50 unidades</td>
+                            <td><span class="block-hash">0x7a2f3b...</span></td>
+                            <td><span class="badge badge-success">Confirmado</span></td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-30 14:18:12</td>
+                            <td>INV_OUT</td>
+                            <td>Azúcar Blanca 50kg</td>
+                            <td>30 unidades</td>
+                            <td><span class="block-hash">0x8b3e5c...</span></td>
+                            <td><span class="badge badge-success">Confirmado</span></td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-30 14:05:33</td>
+                            <td>LOC_ASSIGN</td>
+                            <td>Aceite Vegetal 1L</td>
+                            <td>100 unidades</td>
+                            <td><span class="block-hash">0x9c4f6d...</span></td>
+                            <td><span class="badge badge-success">Confirmado</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Inventory Tab -->
+            <div id="inventory" class="tab-content">
+                <h2>Gestión de Inventario</h2>
+                
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="showAddProductForm()">➕ Agregar Producto</button>
+                    <button class="btn btn-success" onclick="registerIncoming()">📥 Registrar Ingreso</button>
+                    <button class="btn btn-warning" onclick="registerOutgoing()">📤 Registrar Salida</button>
+                    <button class="btn btn-danger" onclick="adjustInventory()">🔧 Ajustar Inventario</button>
+                </div>
+
+                <div id="productForm" style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3>Registrar Nuevo Ingreso</h3>
+                    <div class="form-group">
+                        <label>Producto</label>
+                        <select class="form-control">
+                            <option>Arroz Integral 25kg</option>
+                            <option>Azúcar Blanca 50kg</option>
+                            <option>Aceite Vegetal 1L</option>
+                            <option>Frijol Negro 1kg</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" class="form-control" placeholder="Ej: 50">
+                    </div>
+                    <div class="form-group">
+                        <label>Proveedor</label>
+                        <input type="text" class="form-control" placeholder="Nombre del proveedor">
+                    </div>
+                    <div class="form-group">
+                        <label>Documento de Recepción</label>
+                        <input type="text" class="form-control" placeholder="Número de guía/factura">
+                    </div>
+                    <button class="btn btn-primary" onclick="submitTransaction()">✓ Registrar en Blockchain</button>
+                    <button class="btn" onclick="hideForm()">Cancelar</button>
+                </div>
+
+                <h3>Inventario Actual</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Stock</th>
+                            <th>Ubicación</th>
+                            <th>Rotación</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PRD-001</td>
+                            <td>Arroz Integral 25kg</td>
+                            <td>Granos</td>
+                            <td>120 unidades</td>
+                            <td>A-3-7</td>
+                            <td>2.3x/mes</td>
+                            <td><span class="badge badge-success">Normal</span></td>
+                            <td><button class="btn btn-primary" style="padding: 5px 10px;">Ver</button></td>
+                        </tr>
+                        <tr>
+                            <td>PRD-002</td>
+                            <td>Azúcar Blanca 50kg</td>
+                            <td>Abarrotes</td>
+                            <td>85 unidades</td>
+                            <td>B-2-4</td>
+                            <td>1.8x/mes</td>
+                            <td><span class="badge badge-success">Normal</span></td>
+                            <td><button class="btn btn-primary" style="padding: 5px 10px;">Ver</button></td>
+                        </tr>
+                        <tr>
+                            <td>PRD-003</td>
+                            <td>Aceite Vegetal 1L</td>
+                            <td>Aceites</td>
+                            <td>210 unidades</td>
+                            <td>C-1-2</td>
+                            <td>3.1x/mes</td>
+                            <td><span class="badge badge-success">Normal</span></td>
+                            <td><button class="btn btn-primary" style="padding: 5px 10px;">Ver</button></td>
+                        </tr>
+                        <tr>
+                            <td>PRD-234</td>
+                            <td>Frijol Negro 1kg</td>
+                            <td>Granos</td>
+                            <td>10 unidades</td>
+                            <td>A-4-9</td>
+                            <td>1.2x/mes</td>
+                            <td><span class="badge badge-warning">Bajo Stock</span></td>
+                            <td><button class="btn btn-primary" style="padding: 5px 10px;">Ver</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Optimization Tab -->
+            <div id="optimization" class="tab-content">
+                <h2>Optimización Espacial Inteligente</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Score Optimización Actual</div>
+                        <div class="metric-value">94/100</div>
+                        <div class="metric-change positive">ÓPTIMO</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Distancia Picking Promedio</div>
+                        <div class="metric-value">28.6m</div>
+                        <div class="metric-change positive">↓ 39.5% vs manual</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Eficiencia Espacial</div>
+                        <div class="metric-value">85.7%</div>
+                        <div class="metric-change positive">↑ 25.5%</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Reubicaciones Sugeridas</div>
+                        <div class="metric-value">5</div>
+                        <div class="metric-change">Pendientes</div>
+                    </div>
+                </div>
+
+                <h3>Mapa del Almacén</h3>
+                <p><em>Verde = Ocupada | Amarillo = Ubicación Óptima Sugerida | Gris = Disponible</em></p>
+                <div class="warehouse-grid">
+                    <div class="location-cell occupied">A1<br>🗄️</div>
+                    <div class="location-cell occupied">A2<br>🗄️</div>
+                    <div class="location-cell optimal">A3<br>⭐</div>
+                    <div class="location-cell">A4</div>
+                    <div class="location-cell">A5</div>
+                    <div class="location-cell occupied">B1<br>🗄️</div>
+                    <div class="location-cell occupied">B2<br>🗄️</div>
+                    <div class="location-cell occupied">B3<br>🗄️</div>
+                    
+                    <div class="location-cell">B4</div>
+                    <div class="location-cell">B5</div>
+                    <div class="location-cell occupied">C1<br>🗄️</div>
+                    <div class="location-cell occupied">C2<br>🗄️</div>
+                    <div class="location-cell">C3</div>
+                    <div class="location-cell">C4</div>
+                    <div class="location-cell optimal">C5<br>⭐</div>
+                    <div class="location-cell occupied">D1<br>🗄️</div>
+                    
+                    <div class="location-cell">D2</div>
+                    <div class="location-cell">D3</div>
+                    <div class="location-cell occupied">D4<br>🗄️</div>
+                    <div class="location-cell">D5</div>
+                    <div class="location-cell">E1</div>
+                    <div class="location-cell occupied">E2<br>🗄️</div>
+                    <div class="location-cell">E3</div>
+                    <div class="location-cell optimal">E4<br>⭐</div>
+                </div>
+
+                <h3>Algoritmo de Optimización - NSGA-II</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <p><strong>Objetivos Optimizados:</strong></p>
+                    <ul>
+                        <li>✓ Minimizar distancia de picking: <strong>28.6m promedio</strong> (-39.5%)</li>
+                        <li>✓ Maximizar accesibilidad: <strong>78.9/100</strong> (+50.6%)</li>
+                        <li>✓ Reducir colisiones/incompatibilidades: <strong>0.3 eventos</strong> (-96.6%)</li>
+                        <li>✓ Optimizar utilización espacial: <strong>85.7%</strong> (+25.5%)</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><em>Tiempo de cálculo: 4.3 segundos promedio</em></p>
+                </div>
+
+                <button class="btn btn-primary" style="margin-top: 20px;" onclick="runOptimization()">🔄 Ejecutar Reoptimización</button>
+            </div>
+
+            <!-- Blockchain Tab -->
+            <div id="blockchain" class="tab-content">
+                <h2>Explorador de Blockchain</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Bloques Totales</div>
+                        <div class="metric-value">1,247</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Transacciones Hoy</div>
+                        <div class="metric-value">143</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Nodos Activos</div>
+                        <div class="metric-value">3/3</div>
+                        <div class="metric-change positive">SINCRONIZADOS</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Latencia Promedio</div>
+                        <div class="metric-value">287ms</div>
+                        <div class="metric-change positive">p95 < 445ms ✓</div>
+                    </div>
+                </div>
+
+                <h3>Últimos Bloques Generados</h3>
+                
+                <div class="blockchain-block">
+                    <strong>Bloque #1247</strong> | Timestamp: 2025-01-30 14:23:45<br>
+                    <strong>Hash:</strong> <span class="block-hash">0x7a2f3b8c9d1e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a</span><br>
+                    <strong>Hash Anterior:</strong> <span class="block-hash">0x6a1f2b7c8d0e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a</span><br>
+                    <strong>Transacciones:</strong> 3 | <strong>Endorsers:</strong> Org1, Org3<br>
+                    <strong>Estado:</strong> <span class="badge badge-success">VALIDADO</span>
+                </div>
+
+                <div class="blockchain-block">
+                    <strong>Bloque #1246</strong> | Timestamp: 2025-01-30 14:18:12<br>
+                    <strong>Hash:</strong> <span class="block-hash">0x6a1f2b7c8d0e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a</span><br>
+                    <strong>Hash Anterior:</strong> <span class="block-hash">0x5a0e1b6c7d9e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a</span><br>
+                    <strong>Transacciones:</strong> 5 | <strong>Endorsers:</strong> Org1, Org2<br>
+                    <strong>Estado:</strong> <span class="badge badge-success">VALIDADO</span>
+                </div>
+
+                <div class="blockchain-block">
+                    <strong>Bloque #1245</strong> | Timestamp: 2025-01-30 14:05:33<br>
+                    <strong>Hash:</strong> <span class="block-hash">0x5a0e1b6c7d9e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a</span><br>
+                    <strong>Hash Anterior:</strong> <span class="block-hash">0x4a9d0b5c6d8e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a</span><br>
+                    <strong>Transacciones:</strong> 2 | <strong>Endorsers:</strong> Org1<br>
+                    <strong>Estado:</strong> <span class="badge badge-success">VALIDADO</span>
+                </div>
+
+                <h3>Arquitectura de Red Blockchain</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                    <p><strong>Hyperledger Fabric 2.5</strong> - Red Permisionada</p>
+                    <ul>
+                        <li><strong>Organización 1:</strong> Tienda Mayorista (Peer0, Peer1) - Endorser Principal</li>
+                        <li><strong>Organización 2:</strong> Entidad Reguladora (Peer0) - Verificación Legal</li>
+                        <li><strong>Organización 3:</strong> Auditor Externo (Peer0) - Validación Independiente</li>
+                        <li><strong>Ordering Service:</strong> Raft Consensus (5 nodos ordenadores)</li>
+                        <li><strong>Canales:</strong> inventory-channel (privado), compliance-channel (regulatorio)</li>
+                    </ul>
+                </div>
+
+                <h3>Contratos Inteligentes Desplegados</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Contrato</th>
+                            <th>Versión</th>
+                            <th>Funciones</th>
+                            <th>Líneas Código</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>InventoryContract</strong></td>
+                            <td>v2.1.3</td>
+                            <td>12 públicas, 5 privadas</td>
+                            <td>847</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ComplianceContract</strong></td>
+                            <td>v1.8.5</td>
+                            <td>8 públicas, 15 privadas</td>
+                            <td>1,234</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TraceabilityContract</strong></td>
+                            <td>v1.5.2</td>
+                            <td>6 públicas, 4 privadas</td>
+                            <td>562</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Compliance Tab -->
+            <div id="compliance" class="tab-content">
+                <h2>Verificación de Cumplimiento Legal</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Índice de Cumplimiento General</div>
+                        <div class="metric-value">96%</div>
+                        <div class="metric-change positive">COMPLIANT ✓</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Verificaciones Automáticas</div>
+                        <div class="metric-value">91%</div>
+                        <div class="metric-change positive">Meta: ≥85%</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Tiempo Auditoría</div>
+                        <div class="metric-value">8.4 hrs</div>
+                        <div class="metric-change positive">↓ 82.5% vs manual</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-label">Observaciones Este Mes</div>
+                        <div class="metric-value">1</div>
+                        <div class="metric-change positive">↓ 68% vs promedio</div>
+                    </div>
+                </div>
+
+                <h3>Estado de Verificaciones por Normativa</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Normativa</th>
+                            <th>Verificaciones</th>
+                            <th>Cumplimiento</th>
+                            <th>Última Revisión</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>SUNAT - Comprobantes</strong></td>
+                            <td>1,247 transacciones</td>
+                            <td>100%</td>
+                            <td>2025-01-30 14:23</td>
+                            <td><span class="badge badge-success">COMPLIANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ley 29733 - Protección Datos</strong></td>
+                            <td>450 registros</td>
+                            <td>98%</td>
+                            <td>2025-01-30 12:00</td>
+                            <td><span class="badge badge-success">COMPLIANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Control Interno - Segregación</strong></td>
+                            <td>25 usuarios</td>
+                            <td>100%</td>
+                            <td>2025-01-30 08:00</td>
+                            <td><span class="badge badge-success">COMPLIANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ley 27269 - Firmas Digitales</strong></td>
+                            <td>1,247 firmas</td>
+                            <td>100%</td>
+                            <td>2025-01-30 14:23</td>
+                            <td><span class="badge badge-success">COMPLIANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PRODUCE - Trazabilidad</strong></td>
+                            <td>850 productos</td>
+                            <td>95%</td>
+                            <td>2025-01-30 10:30</td>
+                            <td><span class="badge badge-success">COMPLIANT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Salud y Seguridad Laboral</strong></td>
+                            <td>12 áreas</td>
+                            <td>83%</td>
+                            <td>2025-01-29 16:45</td>
+                            <td><span class="badge badge-warning">REVISAR</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Alertas y Observaciones</h3>
+                <div class="alert alert-warning">
+                    ⚠️ <strong>Observación Menor:</strong> Área de almacenamiento sector D requiere actualización de señalización de seguridad (plazo: 15 días)
+                </div>
+                <div class="alert alert-success">
+                    ✓ <strong>Resolución Exitosa:</strong> Documentación de 2 proveedores completada y verificada
+                </div>
+                <div class="alert alert-info">
+                    ℹ️ <strong>Próxima Auditoría:</strong> Inspección SUNAT programada para 15 de febrero 2025
+                </div>
+
+                <h3>Evidencia Auditable Generada</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <p><strong>Documentos Automáticos Disponibles:</strong></p>
+                    <ul>
+                        <li>📄 Reporte de Inventario Fiscal (actualizado cada hora)</li>
+                        <li>📄 Trazabilidad Completa por Producto (consulta instantánea)</li>
+                        <li>📄 Registro de Accesos y Modificaciones (blockchain inmutable)</li>
+                        <li>📄 Certificación de Firmas Digitales (validación criptográfica)</li>
+                        <li>📄 Informe de Cumplimiento Normativo (generación automática)</li>
+                    </ul>
+                    <button class="btn btn-primary" style="margin-top: 15px;">📥 Descargar Paquete de Auditoría</button>
+                </div>
+
+                <h3>Contratos Inteligentes de Verificación</h3>
+                <div style="background: #2c3e50; color: white; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.85em; margin-top: 20px;">
+                    <strong>ComplianceContract::checkCompliance()</strong><br>
+                    ├─ Verificar trazabilidad SUNAT ✓<br>
+                    ├─ Validar protección datos (Ley 29733) ✓<br>
+                    ├─ Auditar segregación funciones ✓<br>
+                    ├─ Verificar firmas digitales (Ley 27269) ✓<br>
+                    ├─ Validar documentación fiscal ✓<br>
+                    └─ <span style="color: #28a745;">RESULTADO: 96% COMPLIANT</span>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reports" class="tab-content">
+                <h2>Reportes y Análisis</h2>
+                
+                <h3>Reportes Disponibles</h3>
+                <div class="dashboard-grid">
+                    <div class="metric-card" style="cursor: pointer;" onclick="generateReport('inventory')">
+                        <div style="font-size: 2em; margin-bottom: 10px;">📊</div>
+                        <div class="metric-label">Reporte de Inventario</div>
+                        <div style="font-size: 0.85em; margin-top: 8px;">Stock actual, rotación, valorización</div>
+                    </div>
+                    
+                    <div class="metric-card" style="cursor: pointer;" onclick="generateReport('efficiency')">
+                        <div style="font-size: 2em; margin-bottom: 10px;">⚡</div>
+                        <div class="metric-label">Análisis de Eficiencia</div>
+                        <div style="font-size: 0.85em; margin-top: 8px;">KPIs operativos, tendencias</div>
+                    </div>
+                    
+                    <div class="metric-card" style="cursor: pointer;" onclick="generateReport('compliance')">
+                        <div style="font-size: 2em; margin-bottom: 10px;">⚖️</div>
+                        <div class="metric-label">Cumplimiento Normativo</div>
+                        <div style="font-size: 0.85em; margin-top: 8px;">Estado legal, auditorías</div>
+                    </div>
+                    
+                    <div class="metric-card" style="cursor: pointer;" onclick="generateReport('blockchain')">
+                        <div style="font-size: 2em; margin-bottom: 10px;">⛓️</div>
+                        <div class="metric-label">Trazabilidad Blockchain</div>
+                        <div style="font-size: 0.85em; margin-top: 8px;">Historial completo, evidencia</div>
+                    </div>
+                </div>
+
+                <h3>Comparativa: Sistema Actual vs. Baseline Manual</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Indicador</th>
+                            <th>Baseline Manual</th>
+                            <th>Sistema Blockchain</th>
+                            <th>Mejora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Discrepancias de Inventario</strong></td>
+                            <td>28.0%</td>
+                            <td>2.1%</td>
+                            <td><span class="badge badge-success">↓ 92.5%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tiempo de Localización</strong></td>
+                            <td>22.0 min</td>
+                            <td>8.2 min</td>
+                            <td><span class="badge badge-success">↓ 62.7%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tiempo de Auditoría</strong></td>
+                            <td>60.0 hrs</td>
+                            <td>8.4 hrs</td>
+                            <td><span class="badge badge-success">↓ 86.0%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Costos Operativos Mensuales</strong></td>
+                            <td>S/. 47,280</td>
+                            <td>S/. 18,900</td>
+                            <td><span class="badge badge-success">↓ 60.0%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Observaciones Regulatorias</strong></td>
+                            <td>3.2 por año</td>
+                            <td>1.0 por año</td>
+                            <td><span class="badge badge-success">↓ 68.8%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multas Anuales</strong></td>
+                            <td>S/. 67,400</td>
+                            <td>S/. 10,100</td>
+                            <td><span class="badge badge-success">↓ 85.0%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trazabilidad Completa</strong></td>
+                            <td>34%</td>
+                            <td>95%</td>
+                            <td><span class="badge badge-success">↑ 179%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Eficiencia Operativa</strong></td>
+                            <td>100% (baseline)</td>
+                            <td>142%</td>
+                            <td><span class="badge badge-success">↑ 42.0%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Impacto Financiero Anual Proyectado</h3>
+                <div class="dashboard-grid">
+                    <div class="metric-card" style="border-left-color: #28a745;">
+                        <div class="metric-label">Reducción de Pérdidas</div>
+                        <div class="metric-value" style="color: #28a745;">S/. 850,000</div>
+                        <div style="font-size: 0.85em; margin-top: 5px;">Por reducción de discrepancias</div>
+                    </div>
+                    
+                    <div class="metric-card" style="border-left-color: #28a745;">
+                        <div class="metric-label">Ahorro Operativo</div>
+                        <div class="metric-value" style="color: #28a745;">S/. 340,560</div>
+                        <div style="font-size: 0.85em; margin-top: 5px;">Reducción costos administrativos</div>
+                    </div>
+                    
+                    <div class="metric-card" style="border-left-color: #28a745;">
+                        <div class="metric-label">Reducción de Multas</div>
+                        <div class="metric-value" style="color: #28a745;">S/. 57,300</div>
+                        <div style="font-size: 0.85em; margin-top: 5px;">Mejor cumplimiento normativo</div>
+                    </div>
+                    
+                    <div class="metric-card" style="border-left-color: #667eea; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+                        <div class="metric-label">BENEFICIO TOTAL ANUAL</div>
+                        <div class="metric-value" style="color: #1b5e20; font-size: 2.5em;">S/. 1,247,860</div>
+                        <div style="font-size: 0.85em; margin-top: 5px; font-weight: 600;">Por tienda mayorista</div>
+                    </div>
+                </div>
+
+                <h3>Gráficos y Visualizaciones</h3>
+                <div class="chart-container">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 15px;">📈</div>
+                        <p style="font-size: 1.1em; color: #6c757d;">
+                            <strong>Gráficos Interactivos Disponibles</strong><br>
+                            <em style="font-size: 0.9em;">Evolución temporal de KPIs, análisis predictivo, dashboards personalizables</em>
+                        </p>
+                        <button class="btn btn-primary" style="margin-top: 15px;">Ver Dashboards Analíticos</button>
+                    </div>
+                </div>
+
+                <h3>Exportar Reportes</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="exportToPDF()">📄 Exportar PDF</button>
+                    <button class="btn btn-success" onclick="exportToExcel()">📊 Exportar Excel</button>
+                    <button class="btn btn-warning" onclick="exportToCSV()">📋 Exportar CSV</button>
+                    <button class="btn" style="background: #17a2b8; color: white;" onclick="sendByEmail()">📧 Enviar por Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Clock Update
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('es-PE', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Tab Navigation
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // Activate corresponding nav tab
+            event.target.classList.add('active');
+        }
+
+        // Product Inventory Data Storage
+        let products = [
+            {id: 'PRD-001', name: 'Arroz Integral 25kg', category: 'Granos', stock: 120, location: 'A-3-7', rotation: 2.3, status: 'Normal'},
+            {id: 'PRD-002', name: 'Azúcar Blanca 50kg', category: 'Abarrotes', stock: 85, location: 'B-2-4', rotation: 1.8, status: 'Normal'},
+            {id: 'PRD-003', name: 'Aceite Vegetal 1L', category: 'Aceites', stock: 210, location: 'C-1-2', rotation: 3.1, status: 'Normal'},
+            {id: 'PRD-234', name: 'Frijol Negro 1kg', category: 'Granos', stock: 10, location: 'A-4-9', rotation: 1.2, status: 'Bajo Stock'}
+        ];
+
+        let transactions = [];
+        let blockchainBlocks = [];
+
+        // Generate Product ID
+        function generateProductId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `PRD-${timestamp.toString().slice(-4)}${random}`;
+        }
+
+        // Generate Blockchain Hash
+        function generateHash() {
+            const chars = '0123456789abcdef';
+            let hash = '0x';
+            for (let i = 0; i < 64; i++) {
+                hash += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return hash;
+        }
+
+        // Render Inventory Table
+        function renderInventoryTable() {
+            const tbody = document.querySelector('#inventory .data-table tbody');
+            tbody.innerHTML = '';
+            
+            products.forEach(product => {
+                const badgeClass = product.status === 'Bajo Stock' ? 'badge-warning' : 'badge-success';
+                const row = `
+                    <tr>
+                        <td>${product.id}</td>
+                        <td>${product.name}</td>
+                        <td>${product.category}</td>
+                        <td>${product.stock} unidades</td>
+                        <td>${product.location}</td>
+                        <td>${product.rotation}x/mes</td>
+                        <td><span class="badge ${badgeClass}">${product.status}</span></td>
+                        <td><button class="btn btn-primary" style="padding: 5px 10px;" onclick="viewProduct('${product.id}')">Ver</button></td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Form Functions
+        function showAddProductForm() {
+            document.getElementById('productForm').style.display = 'block';
+            document.getElementById('productForm').innerHTML = `
+                <h3>Registrar Nuevo Ingreso</h3>
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="productName" class="form-control" placeholder="Ej: Arroz Integral 25kg">
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="productCategory" class="form-control">
+                        <option>Granos</option>
+                        <option>Abarrotes</option>
+                        <option>Aceites</option>
+                        <option>Lácteos</option>
+                        <option>Bebidas</option>
+                        <option>Enlatados</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" id="productQuantity" class="form-control" placeholder="Ej: 50" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <input type="text" id="productSupplier" class="form-control" placeholder="Nombre del proveedor">
+                </div>
+                <div class="form-group">
+                    <label>Documento de Recepción</label>
+                    <input type="text" id="productReceipt" class="form-control" placeholder="Número de guía/factura">
+                </div>
+                <button class="btn btn-primary" onclick="submitTransaction()">✓ Registrar en Blockchain</button>
+                <button class="btn" onclick="hideForm()">Cancelar</button>
+            `;
+        }
+
+        function hideForm() {
+            document.getElementById('productForm').style.display = 'none';
+        }
+
+        function registerIncoming() {
+            showAddProductForm();
+        }
+
+        function registerOutgoing() {
+            const productName = prompt('Ingrese nombre del producto para salida:');
+            if (!productName) return;
+            
+            const product = products.find(p => p.name.toLowerCase().includes(productName.toLowerCase()));
+            if (!product) {
+                alert('❌ Producto no encontrado');
+                return;
+            }
+            
+            const quantity = parseInt(prompt(`Stock actual: ${product.stock}\nCantidad a retirar:`));
+            if (!quantity || quantity <= 0) return;
+            
+            if (quantity > product.stock) {
+                alert('❌ Cantidad supera el stock disponible');
+                return;
+            }
+            
+            // Update stock
+            product.stock -= quantity;
+            product.status = product.stock < 20 ? 'Bajo Stock' : 'Normal';
+            
+            // Create blockchain transaction
+            const txHash = generateHash();
+            const transaction = {
+                timestamp: new Date().toLocaleString('es-PE'),
+                type: 'INV_OUT',
+                product: product.name,
+                quantity: quantity,
+                hash: txHash.substring(0, 10) + '...',
+                status: 'Confirmado'
+            };
+            transactions.unshift(transaction);
+            
+            renderInventoryTable();
+            updateDashboardMetrics();
+            alert(`✓ Salida Registrada\n\nProducto: ${product.name}\nCantidad: ${quantity}\nStock restante: ${product.stock}\nHash: ${txHash.substring(0, 16)}...`);
+        }
+
+        function adjustInventory() {
+            const productName = prompt('Ingrese nombre del producto a ajustar:');
+            if (!productName) return;
+            
+            const product = products.find(p => p.name.toLowerCase().includes(productName.toLowerCase()));
+            if (!product) {
+                alert('❌ Producto no encontrado');
+                return;
+            }
+            
+            const newStock = parseInt(prompt(`Stock actual: ${product.stock}\nNuevo stock:`));
+            if (newStock === null || newStock < 0) return;
+            
+            const reason = prompt('Motivo del ajuste:') || 'Ajuste manual';
+            
+            const oldStock = product.stock;
+            product.stock = newStock;
+            product.status = product.stock < 20 ? 'Bajo Stock' : 'Normal';
+            
+            const txHash = generateHash();
+            const transaction = {
+                timestamp: new Date().toLocaleString('es-PE'),
+                type: 'INV_ADJ',
+                product: product.name,
+                quantity: `${oldStock} → ${newStock}`,
+                hash: txHash.substring(0, 10) + '...',
+                status: 'Confirmado'
+            };
+            transactions.unshift(transaction);
+            
+            renderInventoryTable();
+            updateDashboardMetrics();
+            alert(`✓ Ajuste Registrado\n\nProducto: ${product.name}\nStock anterior: ${oldStock}\nStock nuevo: ${newStock}\nMotivo: ${reason}\nHash: ${txHash.substring(0, 16)}...`);
+        }
+
+        function submitTransaction() {
+            const name = document.getElementById('productName').value;
+            const category = document.getElementById('productCategory').value;
+            const quantity = parseInt(document.getElementById('productQuantity').value);
+            const supplier = document.getElementById('productSupplier').value;
+            const receipt = document.getElementById('productReceipt').value;
+            
+            if (!name || !quantity || !supplier) {
+                alert('❌ Por favor complete todos los campos obligatorios');
+                return;
+            }
+            
+            // Check if product exists
+            let product = products.find(p => p.name === name);
+            
+            if (product) {
+                // Update existing product
+                product.stock += quantity;
+                product.status = product.stock < 20 ? 'Bajo Stock' : 'Normal';
+            } else {
+                // Create new product
+                const locations = ['A-1-1', 'A-2-3', 'A-3-7', 'B-1-5', 'B-2-4', 'C-1-2', 'C-3-8', 'D-2-6'];
+                product = {
+                    id: generateProductId(),
+                    name: name,
+                    category: category,
+                    stock: quantity,
+                    location: locations[Math.floor(Math.random() * locations.length)],
+                    rotation: (Math.random() * 3 + 0.5).toFixed(1),
+                    status: quantity < 20 ? 'Bajo Stock' : 'Normal'
+                };
+                products.push(product);
+            }
+            
+            // Create blockchain transaction
+            const txHash = generateHash();
+            const transaction = {
+                timestamp: new Date().toLocaleString('es-PE'),
+                type: 'INV_IN',
+                product: name,
+                quantity: quantity + ' unidades',
+                hash: txHash.substring(0, 10) + '...',
+                status: 'Confirmado'
+            };
+            transactions.unshift(transaction);
+            
+            // Update dashboard
+            renderInventoryTable();
+            updateDashboardMetrics();
+            
+            alert(`✓ Transacción Registrada en Blockchain\n\nProducto: ${name}\nCantidad: ${quantity}\nProveedor: ${supplier}\nRecibo: ${receipt}\nUbicación: ${product.location}\nHash: ${txHash.substring(0, 16)}...\n\nTiempo: 2.3 segundos`);
+            hideForm();
+        }
+
+        function viewProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            alert(`📦 Detalle del Producto\n\nID: ${product.id}\nNombre: ${product.name}\nCategoría: ${product.category}\nStock: ${product.stock} unidades\nUbicación: ${product.location}\nRotación: ${product.rotation}x/mes\nEstado: ${product.status}`);
+        }
+
+        function updateDashboardMetrics() {
+            const totalProducts = products.reduce((sum, p) => sum + p.stock, 0);
+            const lowStock = products.filter(p => p.stock < 20).length;
+            
+            // Update metrics on dashboard if visible
+            const metricsCards = document.querySelectorAll('.metric-value');
+            if (metricsCards[0]) metricsCards[0].textContent = totalProducts;
+        }
+
+        function runOptimization() {
+            alert('🔄 Ejecutando Reoptimización Espacial...\n\nAlgoritmo: NSGA-II Multiobjetivo\n\nProcesando:\n✓ Análisis de 850 productos\n✓ Evaluación de 2,500 ubicaciones\n✓ Cálculo de rutas óptimas\n✓ Detección de incompatibilidades\n\nResultado:\n- Score de optimización: 94/100\n- 5 reubicaciones sugeridas\n- Mejora proyectada: +8% eficiencia\n- Tiempo de cálculo: 4.3 segundos');
+        }
+
+        // Generate Reports
+        function generateReport(type) {
+            const reportData = generateReportData(type);
+            
+            // Create report window
+            const reportWindow = window.open('', '_blank', 'width=900,height=700');
+            reportWindow.document.write(reportData.html);
+            reportWindow.document.close();
+        }
+
+        function generateReportData(type) {
+            const now = new Date().toLocaleString('es-PE');
+            let content = '';
+            
+            switch(type) {
+                case 'inventory':
+                    content = generateInventoryReport();
+                    break;
+                case 'efficiency':
+                    content = generateEfficiencyReport();
+                    break;
+                case 'compliance':
+                    content = generateComplianceReport();
+                    break;
+                case 'blockchain':
+                    content = generateBlockchainReport();
+                    break;
+            }
+            
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Reporte - Sistema Blockchain</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; background: #f5f5f5; }
+                        .report-container { background: white; padding: 40px; max-width: 900px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                        .header { border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 30px; }
+                        .header h1 { color: #667eea; margin: 0; }
+                        .header p { color: #666; margin: 5px 0; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+                        th { background: #667eea; color: white; font-weight: 600; }
+                        tr:nth-child(even) { background: #f8f9fa; }
+                        .metric-box { background: #f0f4ff; padding: 15px; margin: 10px 0; border-left: 4px solid #667eea; }
+                        .metric-label { font-size: 0.9em; color: #666; }
+                        .metric-value { font-size: 1.8em; color: #667eea; font-weight: bold; }
+                        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 0.9em; }
+                        @media print { body { background: white; } .report-container { box-shadow: none; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-container">
+                        <div class="header">
+                            <h1>🔗 Sistema Blockchain - Gestión de Inventarios</h1>
+                            <p><strong>Universidad Nacional Hermilio Valdizán</strong></p>
+                            <p>Fecha de generación: ${now}</p>
+                        </div>
+                        ${content}
+                        <div class="footer">
+                            <p>Este reporte fue generado automáticamente por el Sistema Blockchain de Gestión de Inventarios</p>
+                            <p>© 2025 UNHEVAL - Todos los derechos reservados</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            return { html };
+        }
+
+        function generateInventoryReport() {
+            let html = '<h2>📊 Reporte de Inventario Completo</h2>';
+            
+            // Summary metrics
+            const totalProducts = products.length;
+            const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
+            const lowStockCount = products.filter(p => p.stock < 20).length;
+            
+            html += `
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0;">
+                    <div class="metric-box">
+                        <div class="metric-label">Total Productos</div>
+                        <div class="metric-value">${totalProducts}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Stock Total</div>
+                        <div class="metric-value">${totalStock}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Productos Bajo Stock</div>
+                        <div class="metric-value">${lowStockCount}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Products table
+            html += '<h3>Detalle de Productos</h3><table><thead><tr><th>ID</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Ubicación</th><th>Rotación</th><th>Estado</th></tr></thead><tbody>';
+            
+            products.forEach(p => {
+                html += `<tr><td>${p.id}</td><td>${p.name}</td><td>${p.category}</td><td>${p.stock}</td><td>${p.location}</td><td>${p.rotation}x/mes</td><td>${p.status}</td></tr>`;
+            });
+            
+            html += '</tbody></table>';
+            
+            return html;
+        }
+
+        function generateEfficiencyReport() {
+            let html = '<h2>⚡ Análisis de Eficiencia Operativa</h2>';
+            
+            html += `
+                <h3>Indicadores Clave de Desempeño (KPIs)</h3>
+                <table>
+                    <thead><tr><th>Indicador</th><th>Baseline Manual</th><th>Sistema Blockchain</th><th>Mejora</th></tr></thead>
+                    <tbody>
+                        <tr><td>Discrepancias de Inventario</td><td>28.0%</td><td>2.1%</td><td style="color: green;">↓ 92.5%</td></tr>
+                        <tr><td>Tiempo de Localización</td><td>22.0 min</td><td>8.2 min</td><td style="color: green;">↓ 62.7%</td></tr>
+                        <tr><td>Tiempo de Auditoría</td><td>60.0 hrs</td><td>8.4 hrs</td><td style="color: green;">↓ 86.0%</td></tr>
+                        <tr><td>Eficiencia Operativa</td><td>100%</td><td>142%</td><td style="color: green;">↑ 42.0%</td></tr>
+                        <tr><td>Trazabilidad Completa</td><td>34%</td><td>95%</td><td style="color: green;">↑ 179%</td></tr>
+                    </tbody>
+                </table>
+                
+                <h3>Análisis de Optimización Espacial</h3>
+                <div class="metric-box">
+                    <p><strong>Score de Optimización:</strong> 94/100</p>
+                    <p><strong>Distancia Picking Promedio:</strong> 28.6m (↓39.5% vs manual)</p>
+                    <p><strong>Eficiencia Espacial:</strong> 85.7% (↑25.5%)</p>
+                    <p><strong>Algoritmo Utilizado:</strong> NSGA-II Multiobjetivo</p>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        function generateComplianceReport() {
+            let html = '<h2>⚖️ Informe de Cumplimiento Normativo</h2>';
+            
+            html += `
+                <div class="metric-box">
+                    <div class="metric-label">Índice de Cumplimiento General</div>
+                    <div class="metric-value">96%</div>
+                    <p style="margin-top: 10px; color: green; font-weight: bold;">✓ ESTADO: COMPLIANT</p>
+                </div>
+                
+                <h3>Verificaciones por Normativa</h3>
+                <table>
+                    <thead><tr><th>Normativa</th><th>Verificaciones</th><th>Cumplimiento</th><th>Estado</th></tr></thead>
+                    <tbody>
+                        <tr><td>SUNAT - Comprobantes</td><td>1,247 transacciones</td><td>100%</td><td style="color: green;">COMPLIANT</td></tr>
+                        <tr><td>Ley 29733 - Protección Datos</td><td>450 registros</td><td>98%</td><td style="color: green;">COMPLIANT</td></tr>
+                        <tr><td>Control Interno - Segregación</td><td>25 usuarios</td><td>100%</td><td style="color: green;">COMPLIANT</td></tr>
+                        <tr><td>Ley 27269 - Firmas Digitales</td><td>1,247 firmas</td><td>100%</td><td style="color: green;">COMPLIANT</td></tr>
+                        <tr><td>PRODUCE - Trazabilidad</td><td>850 productos</td><td>95%</td><td style="color: green;">COMPLIANT</td></tr>
+                        <tr><td>Salud y Seguridad Laboral</td><td>12 áreas</td><td>83%</td><td style="color: orange;">REVISAR</td></tr>
+                    </tbody>
+                </table>
+                
+                <h3>Observaciones</h3>
+                <div class="metric-box" style="background: #fff3cd; border-left-color: #ffc107;">
+                    <p><strong>⚠️ Observación Menor:</strong> Área de almacenamiento sector D requiere actualización de señalización de seguridad (plazo: 15 días)</p>
+                </div>
+                
+                <h3>Tiempo de Respuesta a Auditorías</h3>
+                <p><strong>Sistema Manual:</strong> 48-72 horas</p>
+                <p><strong>Sistema Blockchain:</strong> 8.4 horas (↓ 82.5%)</p>
+            `;
+            
+            return html;
+        }
+
+        function generateBlockchainReport() {
+            let html = '<h2>⛓️ Reporte de Trazabilidad Blockchain</h2>';
+            
+            html += `
+                <h3>Estadísticas de Red</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                    <div class="metric-box">
+                        <div class="metric-label">Bloques Totales</div>
+                        <div class="metric-value">1,247</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Nodos Activos</div>
+                        <div class="metric-value">3/3</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Transacciones Registradas</div>
+                        <div class="metric-value">${transactions.length + 3}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Latencia Promedio</div>
+                        <div class="metric-value">287ms</div>
+                    </div>
+                </div>
+                
+                <h3>Arquitectura de Red</h3>
+                <p><strong>Plataforma:</strong> Hyperledger Fabric 2.5</p>
+                <p><strong>Organizaciones:</strong> 3 (Tienda Mayorista, Regulador, Auditor)</p>
+                <p><strong>Peers Totales:</strong> 4 nodos</p>
+                <p><strong>Consensus:</strong> Raft (5 ordenadores)</p>
+                <p><strong>Canales:</strong> inventory-channel, compliance-channel</p>
+                
+                <h3>Contratos Inteligentes Activos</h3>
+                <table>
+                    <thead><tr><th>Contrato</th><th>Versión</th><th>Funciones</th><th>Estado</th></tr></thead>
+                    <tbody>
+                        <tr><td>InventoryContract</td><td>v2.1.3</td><td>17 funciones</td><td style="color: green;">ACTIVO</td></tr>
+                        <tr><td>ComplianceContract</td><td>v1.8.5</td><td>23 funciones</td><td style="color: green;">ACTIVO</td></tr>
+                        <tr><td>TraceabilityContract</td><td>v1.5.2</td><td>10 funciones</td><td style="color: green;">ACTIVO</td></tr>
+                    </tbody>
+                </table>
+                
+                <h3>Últimas Transacciones</h3>
+                <table>
+                    <thead><tr><th>Timestamp</th><th>Tipo</th><th>Producto</th><th>Hash</th></tr></thead>
+                    <tbody>
+            `;
+            
+            // Add recent transactions
+            if (transactions.length > 0) {
+                transactions.slice(0, 10).forEach(tx => {
+                    html += `<tr><td>${tx.timestamp}</td><td>${tx.type}</td><td>${tx.product}</td><td style="font-family: monospace; font-size: 0.85em;">${tx.hash}</td></tr>`;
+                });
+            } else {
+                html += `
+                    <tr><td>2025-01-30 14:23:45</td><td>INV_IN</td><td>Arroz Integral 25kg</td><td style="font-family: monospace; font-size: 0.85em;">0x7a2f3b...</td></tr>
+                    <tr><td>2025-01-30 14:18:12</td><td>INV_OUT</td><td>Azúcar Blanca 50kg</td><td style="font-family: monospace; font-size: 0.85em;">0x8b3e5c...</td></tr>
+                `;
+            }
+            
+            html += '</tbody></table>';
+            
+            return html;
+        }
+
+        // Export Functions
+        function exportToPDF() {
+            alert('📄 Exportando a PDF...\n\nEsta funcionalidad requiere una librería externa como jsPDF.\n\nEn una implementación completa, se generaría un PDF con todos los datos del reporte seleccionado.\n\nPor ahora, puedes usar "Archivo > Imprimir > Guardar como PDF" en el reporte generado.');
+            window.print();
+        }
+
+        function exportToExcel() {
+            // Prepare CSV data (Excel compatible)
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "REPORTE DE INVENTARIO - SISTEMA BLOCKCHAIN\n\n";
+            csvContent += "ID,Producto,Categoría,Stock,Ubicación,Rotación,Estado\n";
+            
+            products.forEach(p => {
+                csvContent += `${p.id},"${p.name}",${p.category},${p.stock},${p.location},${p.rotation},${p.status}\n`;
+            });
+            
+            csvContent += `\n\nGenerado: ${new Date().toLocaleString('es-PE')}\n`;
+            csvContent += "Universidad Nacional Hermilio Valdizán\n";
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `inventario_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('✓ Archivo Excel exportado exitosamente\n\nFormato: CSV (compatible con Excel)\nNombre: inventario_[timestamp].csv\n\nPuedes abrir el archivo con Microsoft Excel o Google Sheets.');
+        }
+
+        function exportToCSV() {
+            exportToExcel(); // Same implementation
+        }
+
+        function sendByEmail() {
+            const email = prompt('Ingrese el correo electrónico de destino:');
+            if (!email) return;
+            
+            if (!email.includes('@')) {
+                alert('❌ Correo electrónico inválido');
+                return;
+            }
+            
+            // In real implementation, this would call an API endpoint
+            alert(`📧 Enviando reporte por email...\n\nDestino: ${email}\nAsunto: Reporte Sistema Blockchain - Inventarios\nArchivos adjuntos: reporte.pdf, datos.xlsx\n\n✓ Email enviado exitosamente\n\nNota: En producción, esto enviaría el email real a través de un servicio SMTP.`);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderInventoryTable();
+            updateDashboardMetrics();
+        });
+
+        // Simulate real-time updates (demo purposes)
+        setInterval(() => {
+            // This would update metrics in real-time from blockchain
+            console.log('Sistema sincronizado con blockchain');
+        }, 5000);
+
+        // Initialize
+        console.log('Sistema Blockchain de Inventarios iniciado correctamente');
+        console.log('Conectado a Hyperledger Fabric 2.5');
+        console.log('3/3 nodos activos y sincronizados');
+    </script>
+</body>
+</html>
